@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml&quot;&gt">
+<head>
+    <meta charset="utf-8" />
+    <title>Meteor Dodge</title>
+    <link rel="stylesheet" href="StyleSheet.css" />
+</head>
+<body>
+  <p id="level"></p>
+    <canvas id="canvas" width="600" height="600"></canvas>
+    <script src="Sprites/tardis.js"></script>
+    <script src=Sprites/platform.js></script>
+    <script src="Classes/vector.js"></script>
+    <script src="Classes/acceleration.js"></script>
+    <script src="Classes/Collision.js"></script>
+    <script src="Sprites/meteor.js"></script>
+    <script>
+
+        // This function will always be executed when the page loads
+        window.onload = function ()
+        {
+          // Variables
+            var canvas = document.getElementById('canvas'),
+                context = canvas.getContext('2d'),
+                plevel = document.getElementById('level'),
+                x = 0,
+                y = 0,
+                level = 1,
+                tardis = new Tardis(),
+                platform = new Platform(),
+                vector = new Vector(GetRandomNumber(80, 45), 5),
+                acceleration = new Acceleration(0.1),
+                collision = new Collision(),
+                meteor = {};
+
+            // For loop to create instances of objects in array
+            /*for (i = 1; i <= level; i++) {
+              meteor[i] =  new Meteor();
+              console.log(meteor[i]);
+            }*/
+            // If statement create text that shows user what level the user is on
+            // If the user is on the first level
+            if (level == 1) {
+              plevel.innerHTML = "Level" + "  " + level;
+            }
+
+            // Function to handle the keyboard controls
+            function KeyboardEventHandler(event) {
+              // Up arrow is triggered
+              if (event.keyCode == 38) {
+                console.log("Thrusters");
+              }
+              // Right arrow is triggered
+              if (event.keyCode == 39) {
+                console.log("Go Right");
+                tardis.X = tardis.X + 5;
+              }
+              // Left arrow is triggered
+              if (event.keyCode == 37) {
+                console.log("Go Left");
+                tardis.X = tardis.X - 5;
+              }
+              // Down arrow is triggered
+              if (event.keyCode == 40) {
+                console.log("Go Down");
+                tardis.Y = tardis.Y + 5;
+              }
+            }
+
+            // Listener for the keydown event
+            window.addEventListener('keydown', KeyboardEventHandler, false);
+
+
+            // Enclosing a function in bracks and having a rash of brackets after
+            // allows the function to autoexecute so it does not have to be called
+
+            (function drawFrame() {
+
+                // Clear the canvas for every new frame
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw the sprite
+                tardis.draw(context);
+
+                // Apply the acceleration to the tardis
+                tardis.acceleration(acceleration);
+
+                // Call DrawMeteor Function
+                if (tardis.Y != 0) {
+                DrawMeteor();
+              }
+
+                // Get the next animation frame
+                window.requestAnimationFrame(drawFrame);
+
+                // Draw the platform
+                platform.draw(context);
+
+                // if statement to check when tardis and platform come into contact
+                if (collision.overlap(tardis, platform)) {
+                  NextLevel();
+                }
+                // If statement to trigger boom when tardis
+                // and meteor collide
+                if (collision.overlap(tardis, meteor)) {
+                  tardis.BOOM = true;
+                }
+            })();
+
+            // Function for next level
+            function NextLevel() {
+              // Set boom variable to false
+              tardis.BOOM = false;
+              // Reset Tardis Y position back to 0
+              tardis.Y = 0;
+              // Reset Tardis X position back to 270
+              tardis.X = 270;
+              // Stop the acceleration
+              acceleration.Stop();
+
+              // for loop to reference all of the meteors
+              for (i = 1; i<= level; i++) {
+                // Stop the meteor from moving
+                meteor[i].halt();
+                // Reset the meteor Y axis
+                meteor[i].Y = GetRandomNumber(200, 25);
+                // Reset the meteor X axis
+                meteor[i].X = GetRandomNumber(60, 20);
+              }
+              // Inrement the level variable by 1
+              level++;
+              // Change the text to show what level it is
+              plevel.innerHTML = "Level:" + "  " + level;
+            }
+
+            // Function to create and move meteors
+            function DrawMeteor() {
+
+              for (i = 1; i <= level; i++)
+              {
+                meteor[i] =  new Meteor();
+                console.log(meteor[i]);
+                console.log(i);
+                // Draw the meteor
+                meteor[i].draw(context);
+
+                // Set meteor starting Y coordinates
+                meteor[i].Y = GetRandomNumber(100, 20);
+
+                // Set metero starting X coordinates
+                meteor[i].X = GetRandomNumber(100, 20);
+
+                //Move Meteor
+                meteor[i].move();
+
+                // Set vector is meteor
+                meteor[i].setVector(vector);
+
+                // Apply acceleration to the metoer
+                meteor[i].acceleration(acceleration);
+
+              }
+              // Start thrust using random number
+              //acceleration.VerticalThrust(GetRandomNumber(-0.1, 0));
+              //acceleration.HorizontalThrust(GetRandomNumber(0, 0.1));
+            }
+            // Function to get random number
+            function GetRandomNumber(max, min) {
+              return Math.random() * (max - min);
+            }
+        }
+
+    </script>
+</body>
+</html>
